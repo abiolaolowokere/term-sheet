@@ -1,16 +1,36 @@
-// FormSection1.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../app/index'; // Ensure this is correctly imported
+import { RootStackParamList } from '../../app/index';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'FormSection1'>;
 
-export default function FormSection1() {
-    const navigation = useNavigation<NavigationProp>();
+// Define the Stakeholder type
+type Stakeholder = {
+  id: string;
+  name: string;
+  preDealShares: string;
+  postDealShares: string;
+  percentagePreDeal: number;
+  percentagePostDeal: number;
+};
 
-  // Default values from the ElecPed Term Sheet
+// Define the form item type
+type FormItem = {
+  key: string;
+  label: string;
+  value: string;
+  onChange: (text: string) => void;
+  keyboardType?: 'default' | 'numeric'; // Add keyboardType as an optional prop
+};
+
+// Define the data type that includes both form fields and stakeholders
+type DataItem = FormItem | { key: string; header: string } | { key: string; stakeholder: Stakeholder };
+
+export default function FormSection1() {
+  const navigation = useNavigation<NavigationProp>();
+
   const [issuer, setIssuer] = useState('ElecPed, Inc.');
   const [totalFinancing, setTotalFinancing] = useState('25000000');
   const [investors, setInvestors] = useState('PacificRim Eco Ventures ("PEV")');
@@ -21,8 +41,7 @@ export default function FormSection1() {
   const [pricePerShare, setPricePerShare] = useState('__.00');
   const [firstClosing, setFirstClosing] = useState('On or before October 30, 2019');
 
-  // Pro-forma Capitalization Table
-  const [stakeholders, setStakeholders] = useState([
+  const [stakeholders, setStakeholders] = useState<Stakeholder[]>([
     { id: '1', name: 'Sanchez', preDealShares: '5000', postDealShares: '5000', percentagePreDeal: 40, percentagePostDeal: 17.9 },
     { id: '2', name: 'Ward', preDealShares: '5000', postDealShares: '5000', percentagePreDeal: 40, percentagePostDeal: 17.9 },
     { id: '3', name: 'Angel', preDealShares: '2500', postDealShares: '2500', percentagePreDeal: 20, percentagePostDeal: 8.9 },
@@ -30,17 +49,6 @@ export default function FormSection1() {
     { id: '5', name: 'Option Pool', preDealShares: '0', postDealShares: '1500', percentagePreDeal: 0, percentagePostDeal: 5.4 },
   ]);
 
-  // Handle user input in Pro-Forma Capitalization Table
-  // Type definition for the stakeholder structure
-type Stakeholder = {
-    id: string;
-    name: string;
-    preDealShares: string;
-    postDealShares: string;
-    percentagePreDeal: number;
-    percentagePostDeal: number;
-  };
-  
   const handleStakeholderChange = (id: string, field: keyof Stakeholder, value: string) => {
     setStakeholders(prevState =>
       prevState.map(stakeholder =>
@@ -48,91 +56,77 @@ type Stakeholder = {
       )
     );
   };
-  
+
+  // Combine form data and list into FlatList
+  const data: DataItem[] = [
+    { key: 'issuer', label: 'Issuer:', value: issuer, onChange: setIssuer },
+    { key: 'totalFinancing', label: 'Total Amount of Financing:', value: totalFinancing, onChange: setTotalFinancing, keyboardType: 'numeric' },
+    { key: 'investors', label: 'Investors and Amounts:', value: investors, onChange: setInvestors },
+    { key: 'amount', label: 'Amount:', value: amount, onChange: setAmount, keyboardType: 'numeric' },
+    { key: 'security', label: 'Security:', value: security, onChange: setSecurity },
+    { key: 'capitalStructure', label: 'Capital Structure:', value: capitalStructure, onChange: setCapitalStructure },
+    { key: 'optionPool', label: 'Option Pool:', value: optionPool, onChange: setOptionPool },
+    { key: 'pricePerShare', label: 'Price Per Share:', value: pricePerShare, onChange: setPricePerShare },
+    { key: 'firstClosing', label: 'First Closing:', value: firstClosing, onChange: setFirstClosing },
+    { key: 'header', header: 'Pro-Forma Capitalization Table' },
+    ...stakeholders.map((stakeholder, index) => ({
+      key: `stakeholder-${index}`,
+      stakeholder,
+    })),
+  ];
 
   return (
-    <View style={styles.container}>
-      {/* Existing fields */}
-      <Text>Issuer:</Text>
-      <TextInput value={issuer} onChangeText={setIssuer} style={styles.input} />
-
-      <Text>Total Amount of Financing:</Text>
-      <TextInput 
-        value={totalFinancing} 
-        onChangeText={setTotalFinancing} 
-        style={styles.input} 
-        keyboardType="numeric" 
-      />
-
-      <Text>Investors and Amounts:</Text>
-      <TextInput value={investors} onChangeText={setInvestors} style={styles.input} />
-      <TextInput 
-        value={amount} 
-        onChangeText={setAmount} 
-        style={styles.input} 
-        keyboardType="numeric" 
-      />
-
-      <Text>Security:</Text>
-      <TextInput value={security} onChangeText={setSecurity} style={styles.input} />
-
-      <Text>Capital Structure:</Text>
-      <TextInput value={capitalStructure} onChangeText={setCapitalStructure} style={styles.input} />
-
-      <Text>Option Pool:</Text>
-      <TextInput value={optionPool} onChangeText={setOptionPool} style={styles.input} />
-
-      <Text>Price Per Share:</Text>
-      <TextInput value={pricePerShare} onChangeText={setPricePerShare} style={styles.input} />
-
-      <Text>First Closing:</Text>
-      <TextInput value={firstClosing} onChangeText={setFirstClosing} style={styles.input} />
-
-      {/* Pro-Forma Capitalization Table */}
-      <Text style={styles.header}>Pro-Forma Capitalization Table</Text>
-      <FlatList
-        data={stakeholders}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.row}>
-            <TextInput
-              style={styles.inputSmall}
-              value={item.name}
-              onChangeText={text => handleStakeholderChange(item.id, 'name', text)}
-            />
-            <TextInput
-              style={styles.inputSmall}
-              value={item.preDealShares.toString()}
-              keyboardType="numeric"
-              onChangeText={text => handleStakeholderChange(item.id, 'preDealShares', text)}
-            />
-            <TextInput
-              style={styles.inputSmall}
-              value={item.postDealShares.toString()}
-              keyboardType="numeric"
-              onChangeText={text => handleStakeholderChange(item.id, 'postDealShares', text)}
-            />
-          </View>
-        )}
-        ListHeaderComponent={
-          <View style={styles.row}>
-            <Text style={styles.columnHeader}>Stakeholder</Text>
-            <Text style={styles.columnHeader}>Pre-Deal Shares</Text>
-            <Text style={styles.columnHeader}>Post-Deal Shares</Text>
-          </View>
+    <FlatList
+      data={data}
+      keyExtractor={item => item.key}
+      renderItem={({ item }) => {
+        if ('header' in item) {
+          // Render header
+          return <Text style={styles.header}>{item.header}</Text>;
+        } else if ('stakeholder' in item) {
+          // Render stakeholders
+          return (
+            <View style={styles.row}>
+              <TextInput
+                style={styles.inputSmall}
+                value={item.stakeholder.name}
+                onChangeText={text => handleStakeholderChange(item.stakeholder.id, 'name', text)}
+              />
+              <TextInput
+                style={styles.inputSmall}
+                value={item.stakeholder.preDealShares.toString()}
+                keyboardType="numeric"
+                onChangeText={text => handleStakeholderChange(item.stakeholder.id, 'preDealShares', text)}
+              />
+              <TextInput
+                style={styles.inputSmall}
+                value={item.stakeholder.postDealShares.toString()}
+                keyboardType="numeric"
+                onChangeText={text => handleStakeholderChange(item.stakeholder.id, 'postDealShares', text)}
+              />
+            </View>
+          );
+        } else {
+          // Render form fields
+          return (
+            <View>
+              <Text>{item.label}</Text>
+              <TextInput
+                value={item.value}
+                onChangeText={item.onChange}
+                style={styles.input}
+                keyboardType={item.keyboardType || 'default'}
+              />
+            </View>
+          );
         }
-      />
-
-      <Button title="Next" onPress={() => navigation.navigate('FormSection2')} />
-    </View>
+      }}
+      ListFooterComponent={<Button title="Next" onPress={() => navigation.navigate('FormSection2')} />}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
   input: {
     height: 40,
     borderColor: 'gray',
@@ -156,10 +150,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     marginBottom: 10,
-  },
-  columnHeader: {
-    fontWeight: 'bold',
-    width: 100,
-    textAlign: 'center',
   },
 });
