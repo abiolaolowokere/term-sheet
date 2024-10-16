@@ -8,6 +8,7 @@ import FormSection4 from '../components/forms/FormSection4';
 import FormSection5 from '../components/forms/FormSection5';
 import FormSection6 from '../components/forms/FormSection6';
 import FormSection7 from '../components/forms/FormSection7';
+import FormSignature from '../components/forms/FormSignature';
 import PDFDownload from '../components/forms/PDFDownload';
 
 // Define route types
@@ -37,6 +38,7 @@ export default function App() {
       <Stack.Screen name="FormSection5" component={FormSection5} />
       <Stack.Screen name="FormSection6" component={FormSection6} />
       <Stack.Screen name="FormSection7" component={FormSection7} />
+      <Stack.Screen name="FormSignature" component={FormSignature} />
       <Stack.Screen name="PDFDownload" component={PDFDownload} />
     </Stack.Navigator>
   );

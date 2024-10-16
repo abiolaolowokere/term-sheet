@@ -7,7 +7,7 @@ export default function PDFDownload() {
   const downloadPDF = async () => {
     try {
       // Make a request to your Flask backend to generate the PDF
-      const response = await axios.post('https://chosenhomelandsolution.com/create_term_sheet', {
+      const response = await axios.post('https://chosenhomelandsolution.com/create_term_sheet_with_capitalization', {
         // Add form data collected from each section here
         companyName: 'ElecPed, Inc.',
         totalFinancing: 25000000,

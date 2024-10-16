@@ -32,7 +32,7 @@ export default function FormSection7() {
       {/* Buttons for reset and finishing the form */}
       <View style={styles.buttonContainer}>
         <Button title="Reset" onPress={resetFields} color="red" />
-        <Button title="Finish" onPress={() => navigation.navigate('PDFDownload')} />
+        <Button title="Next" onPress={() => navigation.navigate('FormSignature')} />
       </View>
     </ScrollView>
   );
